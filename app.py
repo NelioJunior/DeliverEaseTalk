@@ -5,8 +5,7 @@
 
 '''
 
-
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
@@ -14,14 +13,12 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-@app.route('/processar_fala', methods=['POST'])
-def processar_fala():
-    atendente_fala = request.json['atendenteFala']
 
-    # Converter a fala do atendente em texto usando a biblioteca ResponsiveVoice.js
-    resposta = "Fala do atendente reproduzida com sucesso!"
+@app.route('/start_simulation')
+def start_simulation():
+  res = 'Eu sou a Leonora, e eu gostaria de uma pizza de quatro queijos, por favor.'  
+  return res
 
-    return jsonify({'resposta': resposta})
 
 if __name__ == '__main__':
     app.run(debug=True)
