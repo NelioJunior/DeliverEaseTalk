@@ -3,22 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pizzaria</title>
+  <title>Deliver Easy Talk</title>
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
-<body>
-  <h1>Pizzaria</h1>
+<body >
+  <div class="container">
+    <h1> Deliver Easy Talk <i class="fas fa-motorcycle"></i> </h1>
+    <div id="responseContainer" class="response-container"></div>
+  </div>
 
-  <!--a href="tel:1-562-867-5309" class="button">Fazer Chamada</a-->
-  <button id="makeCallButton" class="button" >Fazer Chamada</button>
-  <button class="button" onclick="startSimulationButton()" >Iniciar Simulação</button>
-  <div id="responseContainer"></div>
-
-
-  <p id="resBtnHere"></p>
-
+  <footer class="footer">
+    <button id="makeCallButton" class="button"><i class="fas fa-phone"></i> LIGAR</button>
+  </footer>
   
   <script src="https://code.responsivevoice.org/responsivevoice.js?key=K2ywPf2G"></script>
   <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+  {% if flash_message %}
+      <script>
+        initiatePhoneCall()
+      </script>
+  {% endif %}
+
 </body>
 </html>
+
+
+
