@@ -1,68 +1,70 @@
+/*
+   O algoritimo a seguir só funciona no Edge ou o Chrome, não adianta insistir no Chromium 
 
+   Também só ira funcionar em um site com certificacao SSH  (HTTPS) ou local (localhost)
+
+
+  Nell Junior - Jul/23  
+*/
 const makeCallButton = document.getElementById('makeCallButton');
 const responseContainer = document.getElementById('responseContainer');
 const audio = new Audio('./static/phone-calling-153844.mp3');
 var clienteFala = "";
-
-const initiatePhoneCall = () => {
-      makeCallButton.click() 
-  
-}
-
+var flagNellyFalando = false;
 
 window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 recognition.interimResults = true;
-
-
-recognition.addEventListener("result", (e) => {
-    console.log("Here we go")
-
-})
+recognition.lang = 'pt-BR';
 
 recognition.addEventListener("end", () => {
-     recognition.start();
+  if (flagNellyFalando == false) {
+      recognition.start();
+  }      
 });
-  
-recognition.lang = 'pt-BR';
-recognition.start();
+ 
+const initiatePhoneCall = () => {
+      makeCallButton.click()   
+}
+
+recognition.addEventListener("result", (e) => {
+    const result = event.results[0][0].transcript;
+    const results = Array.from(e.results).map((result) => result[0]);
+    const transcripts = results.map((result) => result.transcript);
+    responseContainer.innerText = `Resposta do cliente: ${transcripts}`;
+
+    fetch('/ai_interaction', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ respostaCliente: result })
+    }).then(response => 
+        response.text()
+    ).then(data => {
+        flagNellyFalando = true 
+        falaAI = JSON.parse(data); 
+        responsiveVoice.speak(falaAI.respostaNelli , "Brazilian Portuguese Female", {
+             onend: function() {
+                flagNellyFalando = false;
+             }
+        });
+    })
+
+});
+
 
 const simulaAtendimento = () => {
-    audio.pause();
-    
-    responsiveVoice.speak('Alô?! Aqui é da pizzaria Flor de Madureira.', 'Brazilian Portuguese Male', {
-      onend: () => {
+    audio.volume = 0.1; 
+    audio.play();
+    recognition.start()
 
-         // Refacturar se baseando em https://codepen.io/Web_Cifar/pen/jOqBEjE                              
-        
-        const recognition = new webkitSpeechRecognition();
-        recognition.lang = 'pt-BR';
-  
-        recognition.start();
-  
-        recognition.onresult = (event) => {
-            const result = event.results[0][0].transcript;
-            responseContainer.innerText = `Resposta do cliente: ${result}`;
-    
-            // Enviar a resposta do cliente para o Flask
-            fetch('/processar_resposta', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ respostaCliente: result })
-            })
-              .then(response => response.text())
-              .then(data => {
-                   
-              })
-              .catch(error => {
-                   console.error('Erro:', error);
-              });
-        };
-      }
-    });    
+    setTimeout(()=>{
+        audio.pause();      
+        responsiveVoice.speak('Alô?! Aqui é da pizzaria Flor de Madureira.', 'Brazilian Portuguese Male')
+    }, 9000)    
 };    
+    
 
 
 makeCallButton.addEventListener('click', () => {
@@ -75,10 +77,7 @@ makeCallButton.addEventListener('click', () => {
   
   
   } catch (error) {     
-      audio.volume = 0.1; 
-      audio.play();
-      setTimeout(()=>{simulaAtendimento()}, 9000);                
-      // setTimeout(()=>{responsiveVoice.speak("clienteFala", 'Brazilian Portuguese Female')}, 10000);              
+      simulaAtendimento();
   }
               
 });
