@@ -1,14 +1,31 @@
+
 const makeCallButton = document.getElementById('makeCallButton');
 const responseContainer = document.getElementById('responseContainer');
 const audio = new Audio('./static/phone-calling-153844.mp3');
 var clienteFala = "";
 
-
 const initiatePhoneCall = () => {
       makeCallButton.click() 
   
 }
-    
+
+
+window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = new SpeechRecognition();
+recognition.interimResults = true;
+
+
+recognition.addEventListener("result", (e) => {
+    console.log("Here we go")
+
+})
+
+recognition.addEventListener("end", () => {
+     recognition.start();
+});
+  
+recognition.lang = 'pt-BR';
+recognition.start();
 
 const simulaAtendimento = () => {
     audio.pause();
@@ -17,8 +34,6 @@ const simulaAtendimento = () => {
       onend: () => {
 
          // Refacturar se baseando em https://codepen.io/Web_Cifar/pen/jOqBEjE                              
-
-
         
         const recognition = new webkitSpeechRecognition();
         recognition.lang = 'pt-BR';

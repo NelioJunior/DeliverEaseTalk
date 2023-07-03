@@ -18,8 +18,8 @@ def index():
 
 async def initiate_phone_call():
     global flash_message
-    await asyncio.sleep(7)
-    flash_message = True
+    # await asyncio.sleep(60)
+    flash_message = False 
 
 @app.route('/start_simulation')
 def start_simulation():
@@ -29,5 +29,5 @@ def start_simulation():
 
 if __name__ == '__main__':
     asyncio.run(initiate_phone_call())
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True,port=8000,host='0.0.0.0')
 
