@@ -44,11 +44,16 @@ recognition.addEventListener("result", (e) => {
     ).then(data => {
         flagNellyFalando = true 
         falaAI = JSON.parse(data); 
-        responsiveVoice.speak(falaAI.respostaNelli , "Brazilian Portuguese Female", {
-             onend: function() {
-                flagNellyFalando = false;
-             }
-        });
+
+        setTimeout(()=>{
+            responsiveVoice.speak(falaAI.respostaNelli , "Brazilian Portuguese Female", {
+                 onend: function() {
+                    flagNellyFalando = false;
+                    recognition.start();
+                 }
+            })
+        }, 5000)    
+
     })
 
 });
