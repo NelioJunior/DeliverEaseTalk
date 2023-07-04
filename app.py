@@ -1,23 +1,26 @@
-import time
-import asyncio
+import time 
+import threading
 from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
-flash_message = False
+flag_answer_phone_call = False
 
-async def  initiate_variable():
-    global flash_message
-    await asyncio.sleep(30)
-    flash_message = True 
+def  initiate_variable():
+    global flag_answer_phone_call
+    time.sleep(30)
+    flag_answer_phone_call = True 
+
+processo = threading.Thread(target=initiate_variable)
+processo.start()
 
 @app.route('/')
 def index():
-    return render_template('index.html', flash_message=flash_message)
+    return render_template('index.html', flagAnswerPhoneCall=flag_answer_phone_call)
 
 @app.route('/initiate_phone_call')
 def initiate_phone_call():
-    global flash_message
-    return jsonify(flash_message=flash_message) 
+    global flag_answer_phone_call
+    return jsonify(flagAnswerPhoneCall=flag_answer_phone_call) 
   
 @app.route('/ai_interaction', methods=['POST'])
 def ai_interaction():
@@ -30,5 +33,5 @@ def ai_interaction():
     return jsonify({'respostaNelli': resposta_nelli})
 
 if __name__ == '__main__':
-    asyncio.run(initiate_variable())
     app.run(debug=True,port=8000,host='0.0.0.0')
+    

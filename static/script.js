@@ -11,7 +11,8 @@ const responseContainer = document.getElementById('responseContainer');
 const audio = new Audio('./static/phone-calling-153844.mp3');
 var clienteFala = "";
 var flagNellyFalando = false;
-var flash_message = false; 
+var flagAnswerPhoneCall = false; 
+var flagPhoneCallProgress = false;
 
 window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
@@ -24,14 +25,17 @@ recognition.addEventListener("end", () => {
   }      
 });
 
-setInterval(initiatePhoneCall, 3000);
+setInterval(initiatePhoneCall, 1000);
 
 function initiatePhoneCall() {
     fetch('/initiate_phone_call')
         .then(response => response.json())
         .then(data => {
-            console.log(data.flash_message);
-            makeCallButton.click()             
+            console.log(data.flagAnswerPhoneCall);
+            if (data.flagAnswerPhoneCall && flagPhoneCallProgress == false) {
+                flagPhoneCallProgress = true;
+                makeCallButton.click()               
+            }            
         });
 }
 
@@ -66,7 +70,6 @@ recognition.addEventListener("result", (e) => {
 
 });
 
-
 const simulaAtendimento = () => {
     audio.volume = 0.1; 
     audio.play();
@@ -77,20 +80,15 @@ const simulaAtendimento = () => {
         responsiveVoice.speak('Alô?! Aqui é da pizzaria Flor de Madureira.', 'Brazilian Portuguese Male')
     }, 9000)    
 };    
-    
-
 
 makeCallButton.addEventListener('click', () => {
 
   try {
-      throw new Error('Fluxo desviado enquanto nao tenho uma pizaria de verdade');
-  
-      // Quando possivel contatar uma empresa de delivery 
-      window.location.href = 'tel:1-562-867-5309';
-  
-  
+        throw new Error('Fluxo desviado enquanto nao tenho uma pizaria de verdade');
+        // Quando possivel contatar uma empresa de delivery 
+        window.location.href = 'tel:1-562-867-5309';  
   } catch (error) {     
-      simulaAtendimento();
+        simulaAtendimento();
   }
               
 });
