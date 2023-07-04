@@ -1,25 +1,24 @@
-'''
-  Para executar , após iniciar o virtual enviromente, execute no terminal :
-
-      python app.py
-
-'''
+import time
 import asyncio
 from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 flash_message = False
 
+async def  initiate_variable():
+    global flash_message
+    await asyncio.sleep(30)
+    flash_message = True 
+
 @app.route('/')
 def index():
     return render_template('index.html', flash_message=flash_message)
 
-
-async def initiate_phone_call():
+@app.route('/initiate_phone_call')
+def initiate_phone_call():
     global flash_message
-    # await asyncio.sleep(60)
-    flash_message = False 
-
+    return jsonify(flash_message=flash_message) 
+  
 @app.route('/ai_interaction', methods=['POST'])
 def ai_interaction():
     data = request.get_json()
@@ -31,5 +30,5 @@ def ai_interaction():
     return jsonify({'respostaNelli': resposta_nelli})
 
 if __name__ == '__main__':
-    asyncio.run(initiate_phone_call())
+    asyncio.run(initiate_variable())
     app.run(debug=True,port=8000,host='0.0.0.0')

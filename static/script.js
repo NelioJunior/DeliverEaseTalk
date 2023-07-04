@@ -11,6 +11,7 @@ const responseContainer = document.getElementById('responseContainer');
 const audio = new Audio('./static/phone-calling-153844.mp3');
 var clienteFala = "";
 var flagNellyFalando = false;
+var flash_message = false; 
 
 window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
@@ -22,9 +23,16 @@ recognition.addEventListener("end", () => {
       recognition.start();
   }      
 });
- 
-const initiatePhoneCall = () => {
-      makeCallButton.click()   
+
+setInterval(initiatePhoneCall, 3000);
+
+function initiatePhoneCall() {
+    fetch('/initiate_phone_call')
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.flash_message);
+            makeCallButton.click()             
+        });
 }
 
 recognition.addEventListener("result", (e) => {
