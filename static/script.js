@@ -1,14 +1,24 @@
 /*
    O algoritimo a seguir só funciona no Edge ou o Chrome, não adianta insistir no Chromium 
-
    Também só ira funcionar em um site com certificacao SSH  (HTTPS) ou local (localhost)
 
+   Para que seja possivel o acesso a dispositivos moveis, para testes esta sendo usado o 
+   componente ngrok
+
+            Exemplo de execução 
+
+                        ngrok http 8000
+  
+
+    Para simulações com o SpeechRecognition do navegador  set flagEnableSimulation = true 
 
   Nell Junior - Jul/23  
+
 */
+const flagEnableSimulation = true;
 const makeCallButton = document.getElementById('makeCallButton');
-const responseContainer = document.getElementById('responseContainer');
 const audio = new Audio('./static/phone-calling-153844.mp3');
+
 var clienteFala = "";
 var flagNellyFalando = false;
 var flagAnswerPhoneCall = false; 
@@ -20,30 +30,30 @@ recognition.interimResults = true;
 recognition.lang = 'pt-BR';
 
 recognition.addEventListener("end", () => {
-  if (flagNellyFalando == false) {
+  if (flagEnableSimulation) {
       recognition.start();
   }      
 });
 
-setInterval(initiatePhoneCall, 1000);
+window.onload = () => {
+    fetch('/enable_simulation');
+};
 
-function initiatePhoneCall() {
+setInterval(()=>{
     fetch('/initiate_phone_call')
         .then(response => response.json())
         .then(data => {
-            console.log(data.flagAnswerPhoneCall);
             if (data.flagAnswerPhoneCall && flagPhoneCallProgress == false) {
                 flagPhoneCallProgress = true;
                 makeCallButton.click()               
             }            
         });
-}
+}, 1000);
 
 recognition.addEventListener("result", (e) => {
     const result = event.results[0][0].transcript;
     const results = Array.from(e.results).map((result) => result[0]);
     const transcripts = results.map((result) => result.transcript);
-    responseContainer.innerText = `Resposta do cliente: ${transcripts}`;
 
     fetch('/ai_interaction', {
         method: 'POST',
@@ -82,13 +92,9 @@ const simulaAtendimento = () => {
 };    
 
 makeCallButton.addEventListener('click', () => {
-
-  try {
-        throw new Error('Fluxo desviado enquanto nao tenho uma pizaria de verdade');
-        // Quando possivel contatar uma empresa de delivery 
-        window.location.href = 'tel:1-562-867-5309';  
-  } catch (error) {     
-        simulaAtendimento();
-  }
-              
+    if (flagEnableSimulation == false) {
+        window.location.href = 'tel:1-562-867-5309';      // TODO: Inserir numero valido asim que possivel 
+    } else {
+        simulaAtendimento();    
+    }
 });
