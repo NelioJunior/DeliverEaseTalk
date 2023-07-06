@@ -7,7 +7,7 @@ flag_answer_phone_call = False
 
 def  initiate_variable():
     global flag_answer_phone_call 
-    time.sleep(30)
+    time.sleep(7)
     flag_answer_phone_call = True 
 
 @app.route('/enable_simulation')
