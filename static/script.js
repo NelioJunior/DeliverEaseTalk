@@ -16,49 +16,50 @@ recognition.interimResults = false;
 recognition.lang = 'pt-BR';
 recognition.start();
 
-let finalTranscript = '';
+let finalTranscript = "";
 let partialResults = "";
 
+recognition.continuous = true;
+recognition.interimResults = false;
+
 recognition.onresult = (event) => {
+  let interimTranscript = '';
+  for (let i = event.resultIndex; i < event.results.length; i++) {
+    const transcript = event.results[i][0].transcript;
+    if (event.results[i].isFinal) finalTranscript += transcript + ' ';
+    else interimTranscript += transcript;
+  }
+  console.log(finalTranscript);
 
-  setTimeout(()=>{
+  if (flagNellyFalando == false) {
+    fetch('/ai_interaction', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ respostaCliente: finalTranscript})
+    }).then(response => 
+        response.text()
+    ).then(data => {
+        falaAI = JSON.parse(data); 
+        console.log(falaAI.respostaNelli); 
 
-      let interimTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) finalTranscript += transcript + ' ';
-        else interimTranscript += transcript;
-      }
+        flagNellyFalando = true 
+        recognition.stop();
         
-      alert("mensagem pizzaria:", finalTranscript);
+        responsiveVoice.speak(falaAI.respostaNelli , "Brazilian Portuguese Female", {
+             onend: function() {
+                flagNellyFalando = false;
+                recognition.start(); 
+             }
+        })
 
-      if (flagNellyFalando == false) {
-        fetch('/ai_interaction', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ respostaCliente: finalTranscript})
-        }).then(response => 
-            response.text()
-        ).then(data => {
-            falaAI = JSON.parse(data); 
-            console.log(falaAI.respostaNelli); 
-    
-            flagNellyFalando = true 
-            recognition.stop();
-            
-            responsiveVoice.speak(falaAI.respostaNelli , "Brazilian Portuguese Female", {
-                 onend: function() {
-                    flagNellyFalando = false;
-                 }
-            })
-    
-        })               
-      }            
-}, 2000);
+    })               
+  }            
 
-}
+};
+
+
 
 const simulaAtendimento = () => {
     try {
