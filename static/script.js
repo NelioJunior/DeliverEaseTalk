@@ -67,7 +67,7 @@ const simulaAtendimento = () => {
         audio.pause(); 
         recognition.start();
         flagPhoneCallProgress = true;
-        responsiveVoice.speak('Alô?! Aqui é da pizzaria Flor de Madureira.', 'Brazilian Portuguese Male');
+        responsiveVoice.speak('Alô?! Aqui é da pizzaria Pomarola.', 'Brazilian Portuguese Male');
     }, 9000)    
 };    
 
@@ -93,7 +93,11 @@ makeCallButton.addEventListener('click', () => {
     makeCallButton.disabled = true;
     
     if (flagEnableSimulation == false) {
-        window.location.href = 'tel:+55-11-99750-0734';      // TODO: Inserir numero valido assim que possivel 
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+           window.location.href = 'tel:+55-11-99750-0734';
+        } else {
+           simulaAtendimento();    
+        }
     } else {
         simulaAtendimento();    
     }

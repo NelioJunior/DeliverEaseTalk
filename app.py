@@ -42,7 +42,7 @@ def initiate_phone_call():
     flag_answer_phone_call = False 
     processo = threading.Thread(target=initiate_variable)
     processo.start()
-    return "True"
+    return "phone call started"
 
 @app.route('/wait_for_phone_call')
 def wait_for_phone_call():
