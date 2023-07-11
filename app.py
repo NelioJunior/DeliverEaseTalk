@@ -53,7 +53,7 @@ def wait_for_phone_call():
 def interaction_delivery_nelly():
     data = request.get_json()
 
-    delivery_speech = data['deliverySpeech']
+    delivery_speech = data['deliveryAnswer']
 
     resposta_nelli = 'Oiíí! É a Nelli ligando. Tudo bem? Eu gostaria de duas pizzas, uma de quatro queijos e a outra é margherita. '
     resposta_nelli += 'Também quero uma Coca-Cola de 2 litros, por favor.'

@@ -31,7 +31,7 @@ recognition.onresult = (event) => {
   }
 
   if (flagNellyFalando == false) {
-    fetch('/interaction_delivery_nelly', {
+    fetch('/interaction_delivery_nelly', {  
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
