@@ -1,4 +1,4 @@
-const flagEnableSimulation = true;
+const flagEnableSimulation = false;
 
 const makeCallButton = document.getElementById('makeCallButton');
 const audio = new Audio('./static/phone-calling-153844.mp3');
@@ -29,15 +29,14 @@ recognition.onresult = (event) => {
     if (event.results[i].isFinal) finalTranscript += transcript + ' ';
     else interimTranscript += transcript;
   }
-  console.log(finalTranscript);
 
   if (flagNellyFalando == false) {
-    fetch('/ai_interaction', {
+    fetch('/interaction_delivery_nelly', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ respostaCliente: finalTranscript})
+        body: JSON.stringify({ deliveryAnswer: finalTranscript})
     }).then(response => 
         response.text()
     ).then(data => {
@@ -48,18 +47,14 @@ recognition.onresult = (event) => {
         recognition.stop();
         
         responsiveVoice.speak(falaAI.respostaNelli , "Brazilian Portuguese Female", {
-             onend: function() {
+            onend: function() {
                 flagNellyFalando = false;
                 recognition.start(); 
-             }
+            }
         })
-
     })               
   }            
-
 };
-
-
 
 const simulaAtendimento = () => {
     try {
@@ -78,19 +73,20 @@ const simulaAtendimento = () => {
 
 window.onload = () => {
     if (flagEnableSimulation) {
-        fetch('/enable_simulation');        
-
-        setInterval(()=>{
-            fetch('/initiate_phone_call')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.flagAnswerPhoneCall && flagPhoneCallProgress == false) {
-                        flagPhoneCallProgress = true;
-                        makeCallButton.click()               
-                    }            
-                });
-        }, 1000);        
+        fetch('/initiate_phone_call');        
     } 
+
+    setInterval(()=>{
+        fetch('/wait_for_phone_call')
+            .then(response => response.json())
+            .then(data => {
+                if (data.flagAnswerPhoneCall && flagPhoneCallProgress == false) {
+                    flagPhoneCallProgress = true;
+                    makeCallButton.click()               
+                }            
+            });
+    }, 1000);        
+
 }
 
 makeCallButton.addEventListener('click', () => {  
@@ -102,4 +98,3 @@ makeCallButton.addEventListener('click', () => {
         simulaAtendimento();    
     }
 });
-
