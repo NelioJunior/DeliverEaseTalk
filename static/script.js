@@ -29,31 +29,50 @@ recognition.onresult = (event) => {
     if (event.results[i].isFinal) finalTranscript += transcript + ' ';
     else interimTranscript += transcript;
   }
+  
+  let intervalCount = 0;
 
-  if (flagNellyFalando == false) {
-    fetch('/interaction_delivery_nelly', {  
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ deliveryAnswer: finalTranscript})
-    }).then(response => 
-        response.text()
-    ).then(data => {
-        falaAI = JSON.parse(data); 
-        console.log(falaAI.respostaNelli); 
+  const interval = setInterval(() => {
 
-        flagNellyFalando = true 
-        recognition.stop();
+      if (flagNellyFalando == false && flagPhoneCallProgress) {
+          
+        finalTranscript = "Fala do atendente:" + finalTranscript 
+          
+        fetch('/interaction_between_customer_and_delivery', {  
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ answer: finalTranscript})
+        }).then(response => 
+            response.text()
+        ).then(data => {
+            let interactionPhrases = JSON.parse(data);         
+            let lastPhrase = interactionPhrases[interactionPhrases.length -1].answer;   
+            
+            if (lastPhrase.substring(0, lastPhrase.indexOf(":") + 1) == "Fala de Nelli:") {
+                flagNellyFalando = true; 
+                recognition.stop();
+                
+                let newPhrase = lastPhrase.substring(lastPhrase.indexOf(":") + 1);
+                
+                responsiveVoice.speak(newPhrase , "Brazilian Portuguese Female", {
+                    onend: function() {
+                        flagNellyFalando = false;
+                        recognition.start(); 
+                        clearInterval(interval);
+                    }
+                })                    
+            } else {
+                intervalCount += 1;
+                if (intervalCount > 7) {
+                    clearInterval(interval);
+                } 
+                   
+            }     
+        })               
+      }    
         
-        responsiveVoice.speak(falaAI.respostaNelli , "Brazilian Portuguese Female", {
-            onend: function() {
-                flagNellyFalando = false;
-                recognition.start(); 
-            }
-        })
-    })               
-  }            
+  }, 1000);
+        
 };
 
 const simulaAtendimento = () => {
@@ -67,7 +86,7 @@ const simulaAtendimento = () => {
         audio.pause(); 
         recognition.start();
         flagPhoneCallProgress = true;
-        responsiveVoice.speak('Alô?! Aqui é da pizzaria Pomarola.', 'Brazilian Portuguese Male');
+        responsiveVoice.speak('Alô?! Aqui é da pizzaria flor de manjericão', 'Brazilian Portuguese Male');
     }, 9000)    
 };    
 
@@ -86,7 +105,6 @@ window.onload = () => {
                 }            
             });
     }, 1000);        
-
 }
 
 makeCallButton.addEventListener('click', () => {  
