@@ -44,15 +44,17 @@ def wait_for_phone_call():
 def interaction_between_customer_and_delivery():
     new_request = request.get_json() 
 
-    if len(speach_log) > 1:
-        last_transcript = new_request["answer"]
-        previos_transcript = speach_log[len(speach_log)-1]["answer"]
-        payLoad = last_transcript[last_transcript.index(":") + 1:]
+    last_transcript = new_request["answer"]
+    payLoad = last_transcript[last_transcript.index(":") + 1:]
+   
+    if  payLoad != "":
+        if len(speach_log) > 1:
+            previos_transcript = speach_log[len(speach_log)-1]["answer"]
 
-        if previos_transcript != last_transcript and payLoad != "":
+            if previos_transcript != last_transcript:
+                speach_log.append(new_request) 
+        else: 
             speach_log.append(new_request) 
-    else: 
-        speach_log.append(new_request) 
 
     return jsonify(speach_log)
 
