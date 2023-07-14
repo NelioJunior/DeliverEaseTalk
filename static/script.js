@@ -1,7 +1,8 @@
 const flagEnableSimulation = false;
 
 const makeCallButton = document.getElementById('makeCallButton');
-const audio = new Audio('./static/phone-calling-153844.mp3');
+const audioPickUp = new Audio('./static/pickup.mp3');
+const audioHangUp = new Audio('./static/hangup.mp3');
 let clienteFala = "";
 let flagNellyFalando = false;
 let flagAnswerPhoneCall = false; 
@@ -17,7 +18,7 @@ recognition.lang = 'pt-BR';
 recognition.start();
 
 let lastTranscript = "";
-let previusTranscript
+let previusTranscript = "";
 let partialResults = "";
 
 recognition.continuous = true;
@@ -25,6 +26,7 @@ recognition.interimResults = false;
 
 recognition.onresult = (event) => {
   let interimTranscript = '';
+  lastTranscript = '';
   for (let i = event.resultIndex; i < event.results.length; i++) {
     const transcript = event.results[i][0].transcript;
     if (event.results[i].isFinal) lastTranscript += transcript + ' ';
@@ -41,37 +43,42 @@ recognition.onresult = (event) => {
           lastTranscript = "Fala do atendente:" + lastTranscript 
         }  
           
-        fetch('/interaction_between_customer_and_delivery', {  
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ answer: lastTranscript})
-        }).then(response => 
-            response.text()
-        ).then(data => {
-            let interactionPhrases = JSON.parse(data);         
-            let lastPhrase = interactionPhrases[interactionPhrases.length -1].answer;   
-            
-            if (lastPhrase.substring(0, lastPhrase.indexOf(":") + 1) == "Fala de Nelli:") {
-                flagNellyFalando = true; 
-                recognition.stop();
+        if (lastTranscript != previusTranscript) {
+            previusTranscript = lastTranscript
+
+            fetch('/interaction_between_customer_and_delivery', {  
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ answer: lastTranscript})
+            }).then(response => 
+                response.text()
+            ).then(data => {
+                let interactionPhrases = JSON.parse(data);         
+                let lastPhrase = interactionPhrases[interactionPhrases.length -1].answer;   
                 
-                let newPhrase = lastPhrase.substring(lastPhrase.indexOf(":") + 1);
-                
-                responsiveVoice.speak(newPhrase , "Brazilian Portuguese Female", {
-                    onend: function() {
-                        flagNellyFalando = false;
-                        recognition.start(); 
+                if (lastPhrase.substring(0, lastPhrase.indexOf(":") + 1) == "Fala de Nelli:") {
+                    flagNellyFalando = true; 
+                    recognition.stop();
+                    
+                    let newPhrase = lastPhrase.substring(lastPhrase.indexOf(":") + 1);
+                    
+                    responsiveVoice.speak(newPhrase , "Brazilian Portuguese Female", {
+                        onend: function() {
+                            flagNellyFalando = false;
+                            recognition.start(); 
+                            clearInterval(interval);
+                        }
+                    })                    
+                } else {
+                    intervalCount += 1;
+                    if (intervalCount > 7) {
                         clearInterval(interval);
-                    }
-                })                    
-            } else {
-                intervalCount += 1;
-                if (intervalCount > 7) {
-                    clearInterval(interval);
-                } 
-                   
-            }     
-        })               
+                    } 
+                       
+                }     
+            })               
+        }
+
       }    
         
   }, 1000);
@@ -80,13 +87,13 @@ recognition.onresult = (event) => {
 
 const simulaAtendimento = () => {
     try {
-        audio.volume = 0.1; 
-        audio.play();       
+        audioPickUp.volume = 0.1; 
+        audioPickUp.play();       
         recognition.stop();
     } catch (error) {}    
 
     setTimeout(()=>{
-        audio.pause(); 
+        audioPickUp.pause(); 
         recognition.start();
         flagPhoneCallProgress = true;
         responsiveVoice.speak('Alô?! Aqui é da pizzaria flor de manjericão', 'Brazilian Portuguese Male');
@@ -105,8 +112,10 @@ window.onload = () => {
                 if (data.flagAnswerPhoneCall && flagPhoneCallProgress == false) {
                     flagPhoneCallProgress = true;
                     setTimeout(()=>{
+                        fetch('/hang_up_phone_call');  
                         flagPhoneCallProgress = false;
                         flagNellyFalando = false; 
+                        audioHangUp.play()                        
                     },180000);
                         
                     makeCallButton.click();               
