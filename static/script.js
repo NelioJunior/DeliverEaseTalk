@@ -37,7 +37,9 @@ recognition.onresult = (event) => {
 
       if (flagNellyFalando == false && flagPhoneCallProgress) {
           
-        lastTranscript = "Fala do atendente:" + lastTranscript 
+        if (!lastTranscript.includes("Fala do atendente:")) {   
+          lastTranscript = "Fala do atendente:" + lastTranscript 
+        }  
           
         fetch('/interaction_between_customer_and_delivery', {  
             method: 'POST',

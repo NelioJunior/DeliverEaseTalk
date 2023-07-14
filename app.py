@@ -48,7 +48,7 @@ def interaction_between_customer_and_delivery():
     payLoad = last_transcript[last_transcript.index(":") + 1:]
    
     if  payLoad != "":
-        if len(speach_log) > 1:
+        if len(speach_log) > 0:
             previos_transcript = speach_log[len(speach_log)-1]["answer"]
 
             if previos_transcript != last_transcript:
