@@ -1,6 +1,4 @@
-import time 
 import requests
-import threading
 from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
@@ -31,17 +29,10 @@ try:
 except:
     print('Não foi possível obter o domínio público do Ngrok')
 
-def  initiate_variable():
-    global flag_answer_phone_call 
-    time.sleep(7)
-    flag_answer_phone_call = True 
-
 @app.route('/initiate_phone_call')
 def initiate_phone_call(): 
     global flag_answer_phone_call 
-    flag_answer_phone_call = False 
-    processo = threading.Thread(target=initiate_variable)
-    processo.start()
+    flag_answer_phone_call = True 
     return "True" 
 
 @app.route('/wait_for_phone_call')

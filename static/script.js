@@ -81,7 +81,14 @@ const simulaAtendimento = () => {
         audio.volume = 0.1; 
         audio.play();       
         recognition.stop();
-    } catch (error) {}     
+    } catch (error) {}    
+
+    setTimeout(()=>{
+        audio.pause(); 
+        recognition.start();
+        flagPhoneCallProgress = true;
+        responsiveVoice.speak('Alô?! Aqui é da pizzaria flor de manjericão', 'Brazilian Portuguese Male');
+    }, 9000)    
 };    
 
 window.onload = () => {
@@ -97,9 +104,10 @@ window.onload = () => {
                     flagPhoneCallProgress = true;
                     setTimeout(()=>{
                         flagPhoneCallProgress = false;
-                        flagNellyFalando = false},180000);
+                        flagNellyFalando = false; 
+                    },180000);
                         
-                    makeCallButton.click()               
+                    makeCallButton.click();               
                 }            
             });
     }, 1000);        
