@@ -37,7 +37,7 @@ def  initiate_variable():
     flag_answer_phone_call = True 
 
 @app.route('/initiate_phone_call')
-def initiate_phone_call():
+def initiate_phone_call(): 
     global flag_answer_phone_call 
     flag_answer_phone_call = False 
     processo = threading.Thread(target=initiate_variable)
@@ -51,7 +51,18 @@ def wait_for_phone_call():
 
 @app.route('/interaction_between_customer_and_delivery', methods=['POST'])
 def interaction_between_customer_and_delivery():
-    speach_log.append(request.get_json()) 
+    new_request = request.get_json() 
+
+    if len(speach_log) > 1:
+        last_transcript = new_request["answer"]
+        previos_transcript = speach_log[len(speach_log)-1]["answer"]
+        payLoad = last_transcript[last_transcript.index(":") + 1:]
+
+        if previos_transcript != last_transcript and payLoad != "":
+            speach_log.append(new_request) 
+    else: 
+        speach_log.append(new_request) 
+
     return jsonify(speach_log)
 
 @app.route('/')

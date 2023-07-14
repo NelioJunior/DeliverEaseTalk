@@ -16,7 +16,8 @@ recognition.interimResults = false;
 recognition.lang = 'pt-BR';
 recognition.start();
 
-let finalTranscript = "";
+let lastTranscript = "";
+let previusTranscript
 let partialResults = "";
 
 recognition.continuous = true;
@@ -26,7 +27,7 @@ recognition.onresult = (event) => {
   let interimTranscript = '';
   for (let i = event.resultIndex; i < event.results.length; i++) {
     const transcript = event.results[i][0].transcript;
-    if (event.results[i].isFinal) finalTranscript += transcript + ' ';
+    if (event.results[i].isFinal) lastTranscript += transcript + ' ';
     else interimTranscript += transcript;
   }
   
@@ -36,12 +37,12 @@ recognition.onresult = (event) => {
 
       if (flagNellyFalando == false && flagPhoneCallProgress) {
           
-        finalTranscript = "Fala do atendente:" + finalTranscript 
+        lastTranscript = "Fala do atendente:" + lastTranscript 
           
         fetch('/interaction_between_customer_and_delivery', {  
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ answer: finalTranscript})
+            body: JSON.stringify({ answer: lastTranscript})
         }).then(response => 
             response.text()
         ).then(data => {
@@ -80,14 +81,7 @@ const simulaAtendimento = () => {
         audio.volume = 0.1; 
         audio.play();       
         recognition.stop();
-    } catch (error) {}    
-
-    setTimeout(()=>{
-        audio.pause(); 
-        recognition.start();
-        flagPhoneCallProgress = true;
-        responsiveVoice.speak('Alô?! Aqui é da pizzaria flor de manjericão', 'Brazilian Portuguese Male');
-    }, 9000)    
+    } catch (error) {}     
 };    
 
 window.onload = () => {
@@ -101,6 +95,10 @@ window.onload = () => {
             .then(data => {
                 if (data.flagAnswerPhoneCall && flagPhoneCallProgress == false) {
                     flagPhoneCallProgress = true;
+                    setTimeout(()=>{
+                        flagPhoneCallProgress = false;
+                        flagNellyFalando = false},180000);
+                        
                     makeCallButton.click()               
                 }            
             });
