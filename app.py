@@ -38,7 +38,10 @@ def initiate_phone_call():
 @app.route('/hang_up_phone_call')
 def hang_up_phone_call(): 
     global hang_up_phone_call 
+    global speach_log
+    speach_log = ""
     flag_answer_phone_call = False  
+    speach_log = ""
     return "True" 
 
 @app.route('/wait_for_phone_call')
