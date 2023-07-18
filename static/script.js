@@ -10,10 +10,10 @@ const simulating_phrases = [
   'Alô?! Aqui é da pizzaria flor de manjericão',
   'Pode me falar maiores detalhes do seu pedido',
   'Gostaria de adicionar mais itens ao seu pedido?',
-  'Nós temos um pudim caramelado delicioso, você não quer adicionar a sobremesa?',
-  'O preço ficará em 87reais, já processado em sua conta aqui da pizzaria.',
+  'Nós temos um pudim caramelado delicioso, você gostaria de adicionar como sobremesa ?',
+  'O preço ficará em 87 reais, já discontado da sua conta aqui da pizzaria.',
   'A previsão é de 20 minutos.',
-  'Agradecemos sua preferência. Obrigado. Tchau!'
+  'Agradecemos sua preferência. Obrigado. Tchau !'
 ];
 
 let phrases_index = 0;
@@ -111,10 +111,10 @@ const simulaAtendimento = () => {
         audioPickUp.pause(); 
         recognition.start();
         flagPhoneCallProgress = true;
-        responsiveVoice.speak(simulating_phrases[phrases_index],'Brazilian Portuguese Male');
+        responsiveVoice.speak(simulating_phrases[phrases_index],'Brazilian Portuguese Male', { pitch: 0.5 });
         phrases_index += 1;
         if (phrases_index == simulating_phrases.length) {
-           hangUpPhoneCall(3000);
+           hangUpPhoneCall(6000);
         }            
     }, 6000);    
 };    
@@ -130,12 +130,13 @@ window.onload = () => {
             .then(data => {
                 if (data.flagAnswerPhoneCall && flagPhoneCallProgress == false) {
                     flagPhoneCallProgress = true;
-                    hangUpPhoneCall(180000);                           
-                    makeCallButton.click();               
-                }            
+                    hangUpPhoneCall(180000);                                              
+                    let clickEvent = new Event('click');
+                    makeCallButton.dispatchEvent(clickEvent);                                 
+                };            
             });
     }, 1000);        
-}
+};
 
 hangUpPhoneCall = (time) => {
     setTimeout(()=>{
@@ -151,7 +152,8 @@ makeCallButton.addEventListener('click', () => {
     
     if (flagEnableSimulation == false) {
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-           window.location.href = 'tel:+55-11-99750-0734';
+           // window.location.href = 'tel:+55-11-99750-0734';
+           simulaAtendimento();    
         } else {
            simulaAtendimento();    
         }
