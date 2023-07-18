@@ -11,7 +11,8 @@ const simulating_phrases = [
   'Pode me falar maiores detalhes do seu pedido',
   'Gostaria de adicionar mais itens ao seu pedido?',
   'Nós temos um pudim caramelado delicioso, você não quer adicionar a sobremesa?',
-  'O preço ficará em 87.00 reais, já processado em sua conta aqui da pizzaria.',
+  'O preço ficará em 87reais, já processado em sua conta aqui da pizzaria.',
+  'A previsão é de 20 minutos.',
   'Agradecemos sua preferência. Obrigado. Tchau!'
 ];
 
@@ -21,12 +22,6 @@ let flagNellyFalando = false;
 let flagAnswerPhoneCall = false; 
 let flagPhoneCallProgress = false;
 let flagAwaitPizzaOrderClerkResponse = true;
-
-recognition.continuous = true;
-recognition.interimResults = false;
-recognition.lang = 'pt-BR';
-recognition.start();
-
 let lastTranscript = "";
 let previusTranscript = "";
 let previusNellyPhrase = "";
@@ -35,6 +30,8 @@ let partialResults = "";
 
 recognition.continuous = true;
 recognition.interimResults = false;
+recognition.lang = 'pt-BR';
+recognition.start();
 
 recognition.onresult = (event) => {
   let interimTranscript = '';
@@ -55,59 +52,60 @@ recognition.onresult = (event) => {
           lastTranscript = "Fala do atendente:" + lastTranscript 
         }  
           
-        if (true) {                                                        //(lastTranscript != previusTranscript) {  Melhorar esta parte! Nell Jr Jul/23
-            previusTranscript = lastTranscript;
+        previusTranscript = lastTranscript;
 
-            fetch('/interaction_between_customer_and_delivery', {  
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ answer: lastTranscript})
-            }).then(response => 
-                response.text()
-            ).then(data => {
-                const interactionPhrases = JSON.parse(data);                        
-                const taker_phrases = interactionPhrases.filter(item => item['answer'].includes("fala de nelli:"));
-                
-                if (taker_phrases.length > 0) {
+        fetch('/interaction_between_customer_and_delivery', {  
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ answer: lastTranscript})
+        }).then(response => 
+            response.text()
+        ).then(data => {
+            const interactionPhrases = JSON.parse(data);                        
+            const taker_phrases = interactionPhrases.filter(item => item['answer'].includes("fala de nelli:"));
+            
+            if (taker_phrases.length > 0) {
 
-                    const lastNellyPhrase = taker_phrases[taker_phrases.length -1].answer;   
-                
-                    if (lastNellyPhrase != previusNellyPhrase) {
-                        previusNellyPhrase = lastNellyPhrase;                       
-                        flagNellyFalando = true; 
-                        recognition.stop();
-                        
-                        let newNellyPhrase = lastNellyPhrase.substring(lastNellyPhrase.indexOf(":") + 1);
-                        
-                        responsiveVoice.speak(newNellyPhrase , "Brazilian Portuguese Female", {
-                            onend: function() {
-                                flagNellyFalando = false;
-                                recognition.start(); 
-                                clearInterval(interval);
-                                simulaAtendimento();    
-                            }
-                        })                    
-                    } else {
-                        intervalCount += 1;
-                        if (intervalCount > 7) {
+                const lastNellyPhrase = taker_phrases[taker_phrases.length -1].answer;   
+            
+                if (lastNellyPhrase != previusNellyPhrase) {
+                    previusNellyPhrase = lastNellyPhrase;                       
+                    flagNellyFalando = true; 
+                    recognition.stop();
+                    
+                    let newNellyPhrase = lastNellyPhrase.substring(lastNellyPhrase.indexOf(":") + 1);
+                    
+                    responsiveVoice.speak(newNellyPhrase , "Brazilian Portuguese Female", {
+                        onend: function() {
+                            flagNellyFalando = false;
+                            recognition.start(); 
                             clearInterval(interval);
-                        } 
-                           
-                    }                         
-                } 
-            })               
-        }
+                            simulaAtendimento();    
+                        }
+                    })                    
+                } else {
+                    intervalCount += 1;
+                    if (intervalCount > 7) {
+                        clearInterval(interval);
+                    } 
+                       
+                }                         
+            } 
+        })               
       }        
   }, 2000);
         
 };
 
 const simulaAtendimento = () => {
+    
     try {
-        audioPickUp.volume = 0.1; 
-        audioPickUp.play();       
+        if (phrases_index == 0) {
+            audioPickUp.volume = 0.1; 
+            audioPickUp.play();       
+        }
         recognition.stop();
-    } catch (error) {}    
+    } catch (error) {}                    
 
     setTimeout(()=>{
         audioPickUp.pause(); 
@@ -115,7 +113,10 @@ const simulaAtendimento = () => {
         flagPhoneCallProgress = true;
         responsiveVoice.speak(simulating_phrases[phrases_index],'Brazilian Portuguese Male');
         phrases_index += 1;
-    }, 9000)    
+        if (phrases_index == simulating_phrases.length) {
+           hangUpPhoneCall(3000);
+        }            
+    }, 6000);    
 };    
 
 window.onload = () => {
@@ -129,17 +130,20 @@ window.onload = () => {
             .then(data => {
                 if (data.flagAnswerPhoneCall && flagPhoneCallProgress == false) {
                     flagPhoneCallProgress = true;
-                    setTimeout(()=>{
-                        fetch('/hang_up_phone_call');  
-                        flagPhoneCallProgress = false;
-                        flagNellyFalando = false; 
-                        audioHangUp.play()                        
-                    },180000);
-                        
+                    hangUpPhoneCall(180000);                           
                     makeCallButton.click();               
                 }            
             });
     }, 1000);        
+}
+
+hangUpPhoneCall = (time) => {
+    setTimeout(()=>{
+        fetch('/hang_up_phone_call');  
+        flagPhoneCallProgress = false;
+        flagNellyFalando = false; 
+        audioHangUp.play();                                
+    },time);
 }
 
 makeCallButton.addEventListener('click', () => {  
