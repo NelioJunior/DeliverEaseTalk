@@ -25,13 +25,13 @@ let flagAwaitPizzaOrderClerkResponse = true;
 let lastTranscript = "";
 let previusTranscript = "";
 let previusNellyPhrase = "";
-let previus 
+let previus = "";  
 let partialResults = "";
+let newNellyPhrase = ""; 
 
 recognition.continuous = true;
 recognition.interimResults = false;
 recognition.lang = 'pt-BR';
-recognition.start();
 
 recognition.onresult = (event) => {
   let interimTranscript = '';
@@ -73,7 +73,7 @@ recognition.onresult = (event) => {
                     flagNellyFalando = true; 
                     recognition.stop();
                     
-                    let newNellyPhrase = lastNellyPhrase.substring(lastNellyPhrase.indexOf(":") + 1);
+                    newNellyPhrase = lastNellyPhrase.substring(lastNellyPhrase.indexOf(":") + 1);
                     
                     responsiveVoice.speak(newNellyPhrase , "Brazilian Portuguese Female", {
                         onend: function() {
